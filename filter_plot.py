@@ -17,7 +17,8 @@ import matplotlib.pyplot as plt
 
 
 # Replace this with the location of your downloaded file.
-(Frequency, array) = read('C:\\Users\\mikef\\Desktop\\_Spring 2022\\EGR 334 T 9am\\Final Project\\5. Harris Heller - Floating Soul.wav') # Reading the sound file. 
+(Frequency, array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Lacrimosa.wav') # Reading the sound file.
+#(Frequency, array) = read('C:\\Users\\mikef\\Desktop\\_Spring 2022\\EGR 334 T 9am\\Final Project\\5. Harris Heller - Floating Soul.wav') # Reading the sound file.
 
 
 # In[11]:
@@ -29,7 +30,7 @@ array = array[0:len(array),1]
 # In[12]:
 
 
-plt.plot(array) 
+plt.plot(array)
 plt.title('Original Signal Spectrum')
 plt.xlabel('Frequency(Hz)')
 plt.ylabel('Amplitude')
