@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 # Replace this with the location of your downloaded file.
 
 
-(samplerate, array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Lacrimosa.wav') # Reading the sound file.
-#(samplerate, array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav') # Reading the sound file.
+#(samplerate, array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Lacrimosa.wav') # Reading the sound file.
+(samplerate, array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav') # Reading the sound file.
 
 #(Frequency, array) = read('C:\\Users\\mikef\\Desktop\\_Spring 2022\\EGR 334 T 9am\\Final Project\\5. Harris Heller - Floating Soul.wav') # Reading the sound file.
 
@@ -99,7 +99,7 @@ plt.xlabel('Frequency(Hz)')
 plt.ylabel('Amplitude')
 """
 e,f = signal.butter(5, [380/(samplerate/2),1000/(samplerate/2)], btype='band') # ButterWorth low-filter
-band_data = signal.lfilter(c,d,NewSound_scaled) # Applying the filter to the signal
+band_data = signal.lfilter(e,f,NewSound_scaled) # Applying the filter to the signal
 
 # In[22]:
 # scales all signals
@@ -115,6 +115,10 @@ plt.ylabel('Amplitude')
 write("HighSound.wav", samplerate, high_scaled) # Saving it to the file.
 write("LowSound.wav", samplerate, low_scaled) # Saving it to the file.
 write("BandSound.wav", samplerate, band_scaled) # Saving it to the file.
+
+band2 = NewSound_scaled - high_scaled - low_scaled
+band2_scaled = np.int16(band2/np.max(np.abs(band2)) * 32767)
+write("Band2Sound.wav", samplerate, band2_scaled) # Saving it to the file.
 
 # %%
 """
