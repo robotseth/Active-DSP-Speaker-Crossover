@@ -49,11 +49,36 @@ def import_wav (file_path, chunk_size):
     #print(chunk_array[0].data)
 # create array of chunks
 
+def filter (chunk, type):
+    if type == "highpass" or type == "h" :
+        b, a = signal.butter(5, 1000 / (chunk.sample_rate / 2), btype='highpass')  # ButterWorth filter 4350
+    elif type == "lowpass" or type == "l" :
+        b, a = signal.butter(5, 380 / (chunk.sample_rate / 2), btype='lowpass')  # ButterWorth low-filter
+    elif type == "bandpass" or type == "b" :
+        b, a = signal.butter(5, [380 / (chunk.sample_rate / 2), 1000 / (chunk.sample_rate / 2)], btype='band')  # ButterWorth low-filter
+    else:
+        print("Error - not valid filter type")
+    data = signal.lfilter(b, a, chunk.data)
+    data = np.int16(data / np.max(np.abs(data)) * 32767)
+    return data
+
+def filter_chunk (chunk):
+    high_chunk = filter(chunk,'h')
+    band_chunk = filter(chunk,'b')
+    low_chunk = filter(chunk,'l')
+    filtered_chunks = [high_chunk, band_chunk, low_chunk]
+    return filtered_chunks
+
 if __name__ == '__main__':
     chunk_array = []
     import_wav('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav', 10000)
+    """
+    for n in range(len(chunk_array)):
+        filter(chunk_array[n], "h")
+    """
     #print(chunk_array[0].data)
-    write("FirstChunkAudio.wav", chunk_array[0].sample_rate, chunk_array[0].data)  # Saving it to the file.
+    [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[0])
+    write("FirstChunkAudio.wav", chunk_array[0].sample_rate, low_chunk)  # Saving it to the file.
 """
 print(f"number of channels = {array.shape[1]}")
 length = array.shape[0] / samplerate
