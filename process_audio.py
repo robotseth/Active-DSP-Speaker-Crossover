@@ -80,7 +80,7 @@ def play_chunk (chunk, sample_rate, audio_device):
         #stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1)
         sd.wait()
 
-def play_chunks (chunk_array, sample_rate, audio_device):
+def play_chunk_array (chunk_array, sample_rate, audio_device):
     for n in range(len(chunk_array)):
         play_chunk(chunk_array[n], sample_rate, audio_device)
 
@@ -95,18 +95,17 @@ if __name__ == '__main__':
         high_chunks.append(high_chunk)
         band_chunks.append(band_chunk)
         low_chunks.append(low_chunk)
+        # export_chunk(high_chunk,n,"high")
+        # export_chunk(band_chunk, n,"band")
+        # export_chunk(low_chunk, n,"low")
     print(len(high_chunks))
-    low = threading.Thread(target=play_chunks, args=(low_chunks, chunk_array[n].sample_rate, 4))
+    low = threading.Thread(target=play_chunk_array, args=(low_chunks, chunk_array[n].sample_rate, 4))
     threads.append(low)
-    band = threading.Thread(target=play_chunks, args=(band_chunks, chunk_array[n].sample_rate, 4))
+    band = threading.Thread(target=play_chunk_array, args=(band_chunks, chunk_array[n].sample_rate, 4))
     threads.append(band)
-    high = threading.Thread(target=play_chunks, args=(high_chunks, chunk_array[n].sample_rate, 4))
+    high = threading.Thread(target=play_chunk_array, args=(high_chunks, chunk_array[n].sample_rate, 4))
     threads.append(high)
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
         thread.join()
-
-        # export_chunk(high_chunk,n,"high")
-        # export_chunk(band_chunk, n,"band")
-        # export_chunk(low_chunk, n,"low")
