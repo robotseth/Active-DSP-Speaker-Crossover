@@ -4,3 +4,5 @@
 .venv
 /discord
 .discord
+/exports
+.exports

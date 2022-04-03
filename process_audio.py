@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import scipy as sp
 from scipy.io.wavfile import read, write
 from scipy import signal
@@ -69,16 +70,20 @@ def filter_chunk (chunk):
     filtered_chunks = [high_chunk, band_chunk, low_chunk]
     return filtered_chunks
 
+def export_chunk (chunk, number, name):
+    filename = f'chunk_{name}_{number}.wav'
+    write_address = os.path.join("C:\\Users\\Seth\\Documents\\school\\EGR334\\exports\\", filename)
+    write(write_address, chunk_array[number].sample_rate, chunk)  # Saving it to the file.
+
 if __name__ == '__main__':
     chunk_array = []
     import_wav('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav', 10000)
-    """
     for n in range(len(chunk_array)):
-        filter(chunk_array[n], "h")
-    """
-    #print(chunk_array[0].data)
-    [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[0])
-    write("FirstChunkAudio.wav", chunk_array[0].sample_rate, low_chunk)  # Saving it to the file.
+        [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n])
+        export_chunk(high_chunk,n,"high")
+        export_chunk(band_chunk, n,"band")
+        export_chunk(low_chunk, n,"low")
+
 """
 print(f"number of channels = {array.shape[1]}")
 length = array.shape[0] / samplerate
