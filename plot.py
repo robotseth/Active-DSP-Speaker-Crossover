@@ -25,8 +25,8 @@ cutoff = 3.667
 
 b, a = butter_lowpass(cutoff, fs, order)
 
-data_dir = pjoin(dirname(scipy.io.__file__), 'tests', 'data')
-wav_fname = pjoin(data_dir, '5. Harris Heller - Floating Soul.wav')
+data_dir = 'C:\\Users\\Seth\\Documents\\school\\EGR334\\audio'
+wav_fname = pjoin(data_dir, 'Lacrimosa.wav')
 
 samplerate, data = wavfile.read(wav_fname)
 print(f"number of channels = {data.shape[1]}")
@@ -60,11 +60,4 @@ plt.legend()
 
 plt.subplots_adjust(hspace=0.35)
 
-
-"""time = np.linspace(0., length, data.shape[0])
-plt.plot(time, data[:, 0], label="Left channel")
-plt.plot(time, data[:, 1], label="Right channel")
-plt.legend()
-plt.xlabel("Time [s]")
-plt.ylabel("Amplitude")"""
 plt.show()
