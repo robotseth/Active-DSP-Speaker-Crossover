@@ -98,7 +98,6 @@ if __name__ == '__main__':
         # export_chunk(high_chunk,n,"high")
         # export_chunk(band_chunk, n,"band")
         # export_chunk(low_chunk, n,"low")
-    print(len(high_chunks))
     low = threading.Thread(target=play_chunk_array, args=(low_chunks, chunk_array[n].sample_rate, 4))
     threads.append(low)
     band = threading.Thread(target=play_chunk_array, args=(band_chunks, chunk_array[n].sample_rate, 4))
