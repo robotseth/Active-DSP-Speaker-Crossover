@@ -7,11 +7,6 @@ import sounddevice as sd
 import threading
 import time
 
-# create chunk object from input (sensor reading or audio file)
-# filter chunk and export 3 new chunks (low, mid, high)
-# play each chunk on a different audio device
-# start playing new chunk when the current one ends
-
 class Chunk:
     'Common base class for Chunks'
     chunk_count = 0
