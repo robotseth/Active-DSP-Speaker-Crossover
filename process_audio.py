@@ -11,6 +11,10 @@ out_buffer_low = []
 out_buffer_band = []
 out_buffer_high = []
 global_sample_rate = 1000
+input_device = 1
+output_device_low = 7
+output_device_band = 7
+output_device_high = 7
 
 class Chunk:
     'Common base class for Chunks'
@@ -71,10 +75,11 @@ def filter_chunk (chunk, gain):
     filtered_chunks = [h_chunk, b_chunk, l_chunk]
     return filtered_chunks
 
-
 def input_stream ():
-    stream = sd.InputStream(device=audio_device, channels=1, callback=callback_in, blocksize=4410, dtype=np.int16,
+    global input_device
+    stream = sd.InputStream(device=input_device, channels=1, callback=callback_in, blocksize=4410, dtype=np.int16,
                              samplerate=global_sample_rate)
+    stream.start()
 
 def callback_in (indata, frames, time, status):
     global global_sample_rate
@@ -101,14 +106,16 @@ def play_chunk (chunk, audio_device):
     sd.wait()
 
 
-def stream_chunk (audio_device, filter_type):
-
+def stream_chunk (filter_type):
+    global output_device_low
+    global output_device_band
+    global output_device_high
     if filter_type == 'low':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate) #samplerate=out_buffer_low[0].sample_rate
+        stream = sd.OutputStream(device=output_device_low, channels=1, callback=callback_low, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate) #samplerate=out_buffer_low[0].sample_rate
     elif filter_type == 'band':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate)
+        stream = sd.OutputStream(device=output_device_band, channels=1, callback=callback_band, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate)
     elif filter_type == 'high':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate)
+        stream = sd.OutputStream(device=output_device_high, channels=1, callback=callback_high, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate)
 
     stream.start()
 
@@ -158,11 +165,11 @@ if __name__ == '__main__':
         # export_chunk(band_chunk, n,"band")
         # export_chunk(low_chunk, n,"low")
     #print(out_buffer_high[200].data)
-    low = threading.Thread(target=stream_chunk, args=(6, 'low'), daemon=True)
+    low = threading.Thread(target=stream_chunk, args=('low'), daemon=True)
     threads.append(low)
-    band = threading.Thread(target=stream_chunk, args=(6, 'band'), daemon=True)
+    band = threading.Thread(target=stream_chunk, args=('band'), daemon=True)
     #threads.append(band)
-    high = threading.Thread(target=stream_chunk, args=(6, 'high'), daemon=True)
+    high = threading.Thread(target=stream_chunk, args=('high'), daemon=True)
     #threads.append(high)
     for thread in threads:
         thread.start()
