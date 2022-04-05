@@ -73,6 +73,8 @@ def filter_chunk (chunk, gain):
 
 
 def input_stream ():
+    stream = sd.InputStream(device=audio_device, channels=1, callback=callback_in, blocksize=4410, dtype=np.int16,
+                             samplerate=global_sample_rate)
     pass
 
 def callback_in (indata, frames, time, status):
@@ -105,11 +107,11 @@ def play_chunk (chunk, audio_device):
 def stream_chunk (audio_device, filter_type):
 
     if filter_type == 'low':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=4410, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate) #samplerate=out_buffer_low[0].sample_rate
     elif filter_type == 'band':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, blocksize=4410, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate)
     elif filter_type == 'high':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, blocksize=4410, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate)
 
     stream.start()
 
