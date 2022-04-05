@@ -7,9 +7,9 @@ import sounddevice as sd
 import threading
 import time
 
-out_buffer_low = np.empty([1,2])
-out_buffer_band = np.empty([1,2])
-out_buffer_high = np.empty([1,2])
+out_buffer_low = []
+out_buffer_band = []
+out_buffer_high = []
 
 class Chunk:
     'Common base class for Chunks'
@@ -109,11 +109,11 @@ def play_chunk (chunk, audio_device):
 def stream_chunk (audio_device, filter_type):
 
     if filter_type == 'low':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=441)
     elif filter_type == 'band':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, blocksize=441)
     elif filter_type == 'high':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, blocksize=441)
 
     stream.start()
 
@@ -139,22 +139,22 @@ def async_play_chunks (chunk_array_index, audio_device):
 
 def callback_low(outdata, frames, time, status):
     global out_buffer_low
-    outdata[:] = out_buffer_low[0].data
-    out_buffer_low = np.delete(out_buffer_low, (0), axis=0)
+    outdata[:] = out_buffer_low[0].data.reshape(len(out_buffer_low[0].data),1)
+    out_buffer_low.pop(0)
 
 def callback_band(outdata, frames, time, status):
     global out_buffer_band
-    outdata[:] = out_buffer_band[0].data
-    out_buffer_band = np.delete(out_buffer_band, (0), axis=0)
+    outdata[:] = out_buffer_band[0].data.reshape(len(out_buffer_band[0].data),1)
+    out_buffer_band.pop(0)
 
 def callback_high(outdata, frames, time, status):
     global out_buffer_high
-    outdata[:] = out_buffer_high[0].data
-    out_buffer_high = np.delete(out_buffer_high, (0), axis=0)
+    outdata[:] = out_buffer_high[0].data.reshape(len(out_buffer_high[0].data),1)
+    out_buffer_high.pop(0)
 
 if __name__ == '__main__':
     threads = []  # list to hold threads
-    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\input_wav.wav', 10000)
+    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\input_wav.wav', 10)
     for n in range(len(chunk_array)):
         [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n])
         out_buffer_high.append(high_chunk)
@@ -163,19 +163,18 @@ if __name__ == '__main__':
         # export_chunk(high_chunk,n,"high")
         # export_chunk(band_chunk, n,"band")
         # export_chunk(low_chunk, n,"low")
-    out_buffer_high = np.delete(out_buffer_high, (0), axis=0)
-    out_buffer_band = np.delete(out_buffer_band, (0), axis=0)
-    out_buffer_low = np.delete(out_buffer_low, (0), axis=0)
-    low = threading.Thread(target=stream_chunk, args=(6, 'low'))
+    print(out_buffer_high[200].data)
+    low = threading.Thread(target=stream_chunk, args=(6, 'low'), daemon=True)
     threads.append(low)
-    band = threading.Thread(target=stream_chunk, args=(6, 'band'))
-    threads.append(band)
-    high = threading.Thread(target=stream_chunk, args=(6, 'high'))
-    threads.append(high)
+    band = threading.Thread(target=stream_chunk, args=(6, 'band'), daemon=True)
+    #threads.append(band)
+    high = threading.Thread(target=stream_chunk, args=(6, 'high'), daemon=True)
+    #threads.append(high)
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
         thread.join()
+    time.sleep(100)
 
 
 """
