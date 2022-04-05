@@ -86,10 +86,11 @@ def filter_chunk (chunk):
     filtered_chunks = [h_chunk, b_chunk, l_chunk]
     return filtered_chunks
 
+
 def input_stream ():
     pass
 
-def load_input_buffer ():
+def load_output_buffer ():
 
     pass
 
@@ -108,11 +109,11 @@ def play_chunk (chunk, audio_device):
 def stream_chunk (chunk, audio_device, filter_type):
 
     if filter_type == 'low':
-        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1, callback=callback_low)
+            stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low)
     elif filter_type == 'band':
-        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1, callback=callback_band)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band)
     elif filter_type == 'high':
-        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1, callback=callback_high)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high)
 
     stream.start()
 
