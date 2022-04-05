@@ -144,12 +144,12 @@ def callback_low(outdata, frames, time, status):
 def callback_band(outdata, frames, time, status):
     global out_buffer_band
     outdata[:] = out_buffer_band[0].data
-    out_buffer_low = np.delete(out_buffer_band, (0), axis=0)
+    out_buffer_band = np.delete(out_buffer_band, (0), axis=0)
 
 def callback_high(outdata, frames, time, status):
     global out_buffer_high
     outdata[:] = out_buffer_high[0].data
-    out_buffer_low = np.delete(out_buffer_high, (0), axis=0)
+    out_buffer_high = np.delete(out_buffer_high, (0), axis=0)
 
 if __name__ == '__main__':
     lock = threading.Lock()
