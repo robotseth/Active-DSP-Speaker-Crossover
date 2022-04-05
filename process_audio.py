@@ -49,22 +49,6 @@ def import_wav (file_path, chunk_size):
     print("Number of chunks: " + str(len(chunk_array)))
     return chunk_array
 
-
-
-""""############### NOTES / TO DO ###############"""
-# MAIN LOGIC:
-# each thread should start with a loop that constantly checks if new data has been added to an array of chunks.
-# If it has, it should play the new chunks until it is out of data at which point it loops.
-# The main loop should process an audio file for testing and will read sensor data in the real thing
-
-# program a function that allows the playback threads to only play up until a certain number of chunks back so that a
-# delay can be added for the live sensor reading
-
-# look into not using play and trying stream or something so that there are not hickups on playback.
-# Can you append to the playback array mid-playback?
-
-
-
 def filter (chunk, type, gain):
     if type == "highpass" or type == "h" :
         b, a = signal.butter(5, 1000 / (chunk.sample_rate / 2), btype='highpass')  # ButterWorth filter 4350
@@ -75,7 +59,7 @@ def filter (chunk, type, gain):
     else:
         print("Error - not valid filter type")
     data = signal.lfilter(b, a, chunk.data)
-    data = np.int16(data / np.max(np.abs(data)) * 32767 * gain)
+    data = np.int16(data / np.max(np.abs(data)) * 32767) * gain
     filtered_chunk = Chunk(chunk.length, chunk.sample_rate, data)
     return filtered_chunk
 
@@ -98,6 +82,7 @@ def load_output_buffer ():
 def export_chunk (chunk, number, name):
     filename = f'chunk_{name}_{number}.wav'
     write_address = os.path.join("C:\\Users\\Seth\\Documents\\school\\EGR334\\exports\\", filename)
+    #write_address = os.path.join("C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\discord\\", filename)
     write(write_address, chunk_array[number].sample_rate, chunk)  # Saving it to the file.
 
 
@@ -109,11 +94,11 @@ def play_chunk (chunk, audio_device):
 def stream_chunk (audio_device, filter_type):
 
     if filter_type == 'low':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=441, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=4410, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
     elif filter_type == 'band':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, samplesize=2, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, blocksize=4410, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
     elif filter_type == 'high':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, samplesize=2, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, blocksize=4410, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
 
     stream.start()
 
@@ -121,7 +106,6 @@ def stream_chunk (audio_device, filter_type):
 def play_chunk_array (chunk_array, audio_device):
     for n in range(len(chunk_array)):
         play_chunk(chunk_array[n], audio_device)
-
 
 def async_play_chunks (chunk_array_index, audio_device):
     i = 1
@@ -154,7 +138,7 @@ def callback_high(outdata, frames, time, status):
 
 if __name__ == '__main__':
     threads = []  # list to hold threads
-    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\input_wav.wav', 10)
+    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
     for n in range(len(chunk_array)):
         [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n], .5)
         out_buffer_high.append(high_chunk)
@@ -163,13 +147,13 @@ if __name__ == '__main__':
         # export_chunk(high_chunk,n,"high")
         # export_chunk(band_chunk, n,"band")
         # export_chunk(low_chunk, n,"low")
-    print(out_buffer_high[200].data)
+    #print(out_buffer_high[200].data)
     low = threading.Thread(target=stream_chunk, args=(6, 'low'), daemon=True)
-    #threads.append(low)
+    threads.append(low)
     band = threading.Thread(target=stream_chunk, args=(6, 'band'), daemon=True)
     #threads.append(band)
     high = threading.Thread(target=stream_chunk, args=(6, 'high'), daemon=True)
-    threads.append(high)
+    #threads.append(high)
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
