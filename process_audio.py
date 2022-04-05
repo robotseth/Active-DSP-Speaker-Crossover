@@ -75,7 +75,6 @@ def filter_chunk (chunk, gain):
 def input_stream ():
     stream = sd.InputStream(device=audio_device, channels=1, callback=callback_in, blocksize=4410, dtype=np.int16,
                              samplerate=global_sample_rate)
-    pass
 
 def callback_in (indata, frames, time, status):
     global global_sample_rate
@@ -83,14 +82,12 @@ def callback_in (indata, frames, time, status):
     chunk.data = indata
     chunk.sample_rate = global_sample_rate
     [h_chunk, b_chunk, l_chunk] = filter_chunk(chunk, 1)
-    out_buffer_low.append(l_chunk)
-    out_buffer_band.append(b_chunk)
-    out_buffer_high.append(h_chunk)
+    load_output_buffer([h_chunk, b_chunk, l_chunk])
 
-def load_output_buffer ():
-
-    pass
-
+def load_output_buffer (chunk_array):
+    out_buffer_low.append(chunk_array[2])
+    out_buffer_band.append(chunk_array[1])
+    out_buffer_high.append(chunk_array[0])
 
 def export_chunk (chunk, number, name):
     filename = f'chunk_{name}_{number}.wav'
