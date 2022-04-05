@@ -86,6 +86,8 @@ def filter_chunk (chunk):
     filtered_chunks = [h_chunk, b_chunk, l_chunk]
     return filtered_chunks
 
+def input_stream ():
+
 
 def load_input_buffer ():
 
@@ -136,30 +138,18 @@ def async_play_chunks (chunk_array_index, audio_device):
 
 def callback_low(outdata, frames, time, status):
     global out_buffer_low
-    filtered_array = []
-    rows, cols = out_buffer_low.size
-    for row in range(rows):
-        filtered_array.append(out_buffer_low[row].data)
-    np.delete(out_buffer_low, (np.linspace(1,rows-1,rows-1)), axis=0)
-    outdata[:] = filtered_array
+    outdata[:] = out_buffer_low[0].data
+    out_buffer_low = np.delete(out_buffer_low, (0), axis=0)
 
 def callback_band(outdata, frames, time, status):
     global out_buffer_band
-    filtered_array = []
-    rows, cols = out_buffer_band.size
-    for row in range(rows):
-        filtered_array.append(out_buffer_band[row].data)
-    np.delete(out_buffer_band, (np.linspace(1,rows-1,rows-1)), axis=0)
-    outdata[:] = filtered_array
+    outdata[:] = out_buffer_band[0].data
+    out_buffer_low = np.delete(out_buffer_band, (0), axis=0)
 
 def callback_high(outdata, frames, time, status):
     global out_buffer_high
-    filtered_array = []
-    rows, cols = out_buffer_high.size
-    for row in range(rows):
-        filtered_array.append(out_buffer_low[row].data)
-    np.delete(out_buffer_high, (np.linspace(1,rows-1,rows-1)), axis=0)
-    outdata[:] = filtered_array
+    outdata[:] = out_buffer_high[0].data
+    out_buffer_low = np.delete(out_buffer_high, (0), axis=0)
 
 if __name__ == '__main__':
     lock = threading.Lock()
