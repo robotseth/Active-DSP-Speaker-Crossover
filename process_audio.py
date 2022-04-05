@@ -86,10 +86,11 @@ def filter_chunk (chunk):
     filtered_chunks = [h_chunk, b_chunk, l_chunk]
     return filtered_chunks
 
+
 def input_stream ():
 
 
-def load_input_buffer ():
+def load_output_buffer ():
 
     pass
 
