@@ -87,7 +87,7 @@ def filter_chunk (chunk):
     return filtered_chunks
 
 def input_stream ():
-
+    pass
 
 def load_input_buffer ():
 
@@ -152,51 +152,29 @@ def callback_high(outdata, frames, time, status):
     out_buffer_high = np.delete(out_buffer_high, (0), axis=0)
 
 if __name__ == '__main__':
-    lock = threading.Lock()
-    global_chunk_array = np.empty(shape=(1,3))
     threads = []  # list to hold threads
     chunk_array = import_wav('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav', 10000)
-    high_chunks = []
-    band_chunks = []
-    low_chunks = []
-
-    # Old play_chunk-based functions
-    # low = threading.Thread(target=play_chunk_array, args=(2, 4))
-    # threads.append(low)
-    # band = threading.Thread(target=play_chunk_array, args=(1, 4))
-    # threads.append(band)
-    # high = threading.Thread(target=play_chunk_array, args=(0, 4))
-    # threads.append(high)
-
-    low = threading.Thread(target=stream_chunk, args=(2, 4, 0))
+    for n in range(len(chunk_array)):
+        [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n])
+        out_buffer_high.append(high_chunk)
+        out_buffer_band.append(band_chunk)
+        out_buffer_low.append(low_chunk)
+        # export_chunk(high_chunk,n,"high")
+        # export_chunk(band_chunk, n,"band")
+        # export_chunk(low_chunk, n,"low")
+    out_buffer_high = np.delete(out_buffer_high, (0), axis=0)
+    out_buffer_band = np.delete(out_buffer_band, (0), axis=0)
+    out_buffer_low = np.delete(out_buffer_low, (0), axis=0)
+    low = threading.Thread(target=stream_chunk, args=(low_chunks, 6, ))
     threads.append(low)
-    band = threading.Thread(target=stream_chunk, args=(1, 4, 1))
+    band = threading.Thread(target=stream_chunk, args=(band_chunks, 6))
     threads.append(band)
-    high = threading.Thread(target=stream_chunk, args=(0, 4, 2))
+    high = threading.Thread(target=stream_chunk, args=(high_chunks, 6))
     threads.append(high)
-
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
         thread.join()
-    x = 1
-    while x:
-        for n in range(len(chunk_array)):
-            #[high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n])
-            chunks = np.array(filter_chunk(chunk_array[n]), ndmin=2)
-            #print(chunks.shape)
-            #(global_chunk_array.shape)
-            #high_chunks.append(high_chunk)
-            #band_chunks.append(band_chunk)
-            #low_chunks.append(low_chunk)
-            global_chunk_array = np.append(global_chunk_array,chunks,axis=0)
-            rows, columns = global_chunk_array.shape
-            print(rows)
-            # export_chunk(high_chunk,n,"high")
-            # export_chunk(band_chunk, n,"band")
-            # export_chunk(low_chunk, n,"low")
-            x = 0
-        #print(global_chunk_array)
 
 
 """
