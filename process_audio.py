@@ -65,7 +65,7 @@ def import_wav (file_path, chunk_size):
 
 
 
-def filter (chunk, type):
+def filter (chunk, type, gain):
     if type == "highpass" or type == "h" :
         b, a = signal.butter(5, 1000 / (chunk.sample_rate / 2), btype='highpass')  # ButterWorth filter 4350
     elif type == "lowpass" or type == "l" :
@@ -75,14 +75,14 @@ def filter (chunk, type):
     else:
         print("Error - not valid filter type")
     data = signal.lfilter(b, a, chunk.data)
-    data = np.int16(data / np.max(np.abs(data)) * 32767)
+    data = np.int16(data / np.max(np.abs(data)) * 32767 * gain)
     filtered_chunk = Chunk(chunk.length, chunk.sample_rate, data)
     return filtered_chunk
 
-def filter_chunk (chunk):
-    h_chunk = filter(chunk,'h')
-    b_chunk = filter(chunk,'b')
-    l_chunk = filter(chunk,'l')
+def filter_chunk (chunk, gain):
+    h_chunk = filter(chunk,'h', gain)
+    b_chunk = filter(chunk,'b', gain)
+    l_chunk = filter(chunk,'l', gain)
     filtered_chunks = [h_chunk, b_chunk, l_chunk]
     return filtered_chunks
 
@@ -109,11 +109,11 @@ def play_chunk (chunk, audio_device):
 def stream_chunk (audio_device, filter_type):
 
     if filter_type == 'low':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=441)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_low, blocksize=441, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
     elif filter_type == 'band':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, blocksize=441)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_band, samplesize=2, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
     elif filter_type == 'high':
-        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, blocksize=441)
+        stream = sd.OutputStream(device=audio_device, channels=1, callback=callback_high, samplesize=2, dtype=np.int16, samplerate=out_buffer_low[0].sample_rate)
 
     stream.start()
 
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     threads = []  # list to hold threads
     chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\input_wav.wav', 10)
     for n in range(len(chunk_array)):
-        [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n])
+        [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n], .5)
         out_buffer_high.append(high_chunk)
         out_buffer_band.append(band_chunk)
         out_buffer_low.append(low_chunk)
@@ -165,11 +165,11 @@ if __name__ == '__main__':
         # export_chunk(low_chunk, n,"low")
     print(out_buffer_high[200].data)
     low = threading.Thread(target=stream_chunk, args=(6, 'low'), daemon=True)
-    threads.append(low)
+    #threads.append(low)
     band = threading.Thread(target=stream_chunk, args=(6, 'band'), daemon=True)
     #threads.append(band)
     high = threading.Thread(target=stream_chunk, args=(6, 'high'), daemon=True)
-    #threads.append(high)
+    threads.append(high)
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
