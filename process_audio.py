@@ -7,6 +7,8 @@ import sounddevice as sd
 import threading
 import time
 
+out_buffer = np.empty([1,3])
+
 class Chunk:
     'Common base class for Chunks'
     chunk_count = 0
@@ -109,7 +111,6 @@ def async_play_chunks (chunk_array_index, audio_device):
                 print("I is: " + str(i))
                 play_chunk(global_chunk_array[chunk_array_index][i], audio_device)
                 i += 1
-
 
 def callback(outdata, frames, time, status):
     for i in range(8):
