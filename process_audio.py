@@ -7,7 +7,9 @@ import sounddevice as sd
 import threading
 import time
 
-out_buffer = np.empty([1,3])
+out_buffer_low = np.empty([1,2])
+out_buffer_band = np.empty([1,2])
+out_buffer_high = np.empty([1,2])
 
 class Chunk:
     'Common base class for Chunks'
@@ -112,12 +114,14 @@ def async_play_chunks (chunk_array_index, audio_device):
                 play_chunk(global_chunk_array[chunk_array_index][i], audio_device)
                 i += 1
 
-def callback(outdata, frames, time, status):
-    for i in range(8):
-        channels[i] = audioData
-    multiChannel = np.column_stack(
-        (channels[0], channels[1], channels[2], channels[3], channels[4], channels[5], channels[6], channels[7]))
-    outdata[:] = multiChannel
+def callback_low(outdata, frames, time, status):
+    global out_buffer_low
+    filtered_array = []
+    rows, cols = out_buffer_low.size
+    for row in range(rows):
+        filtered_array.append(out_buffer_low[row].data)
+    out_buffer_low
+    outdata[:] = filtered_array
 
 if __name__ == '__main__':
     lock = threading.Lock()
