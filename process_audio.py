@@ -154,7 +154,7 @@ def callback_high(outdata, frames, time, status):
 
 if __name__ == '__main__':
     threads = []  # list to hold threads
-    chunk_array = import_wav('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav', 10000)
+    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\input_wav.wav', 10000)
     for n in range(len(chunk_array)):
         [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n])
         out_buffer_high.append(high_chunk)
@@ -166,11 +166,11 @@ if __name__ == '__main__':
     out_buffer_high = np.delete(out_buffer_high, (0), axis=0)
     out_buffer_band = np.delete(out_buffer_band, (0), axis=0)
     out_buffer_low = np.delete(out_buffer_low, (0), axis=0)
-    low = threading.Thread(target=stream_chunk, args=(low_chunks, 6, ))
+    low = threading.Thread(target=stream_chunk, args=(6, 'low'))
     threads.append(low)
-    band = threading.Thread(target=stream_chunk, args=(band_chunks, 6))
+    band = threading.Thread(target=stream_chunk, args=(6, 'band'))
     threads.append(band)
-    high = threading.Thread(target=stream_chunk, args=(high_chunks, 6))
+    high = threading.Thread(target=stream_chunk, args=(6, 'high'))
     threads.append(high)
     for thread in threads:
         thread.start()
