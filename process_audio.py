@@ -84,19 +84,36 @@ def filter_chunk (chunk):
     filtered_chunks = [h_chunk, b_chunk, l_chunk]
     return filtered_chunks
 
+
+def load_input_buffer ():
+
+    pass
+
+
 def export_chunk (chunk, number, name):
     filename = f'chunk_{name}_{number}.wav'
     write_address = os.path.join("C:\\Users\\Seth\\Documents\\school\\EGR334\\exports\\", filename)
     write(write_address, chunk_array[number].sample_rate, chunk)  # Saving it to the file.
 
+
 def play_chunk (chunk, audio_device):
-        sd.play(chunk.data, chunk.sample_rate, device=audio_device)
-        #stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1)
-        sd.wait()
+    sd.play(chunk.data, chunk.sample_rate, device=audio_device)
+    sd.wait()
+
+
+def stream_chunk (chunk, audio_device):
+
+    if stream is None:
+        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1)
+    else:
+
+    pass
+
 
 def play_chunk_array (chunk_array, audio_device):
     for n in range(len(chunk_array)):
         play_chunk(chunk_array[n], audio_device)
+
 
 def async_play_chunks (chunk_array_index, audio_device):
     i = 1
@@ -128,12 +145,20 @@ if __name__ == '__main__':
     band_chunks = []
     low_chunks = []
 
-    low = threading.Thread(target=play_chunk_array, args=(2, 4))
+    # low = threading.Thread(target=play_chunk_array, args=(2, 4))
+    # threads.append(low)
+    # band = threading.Thread(target=play_chunk_array, args=(1, 4))
+    # threads.append(band)
+    # high = threading.Thread(target=play_chunk_array, args=(0, 4))
+    # threads.append(high)
+
+    low = threading.Thread(target=stream_chunk, args=(2, 4))
     threads.append(low)
-    band = threading.Thread(target=play_chunk_array, args=(1, 4))
+    band = threading.Thread(target=stream_chunk, args=(1, 4))
     threads.append(band)
-    high = threading.Thread(target=play_chunk_array, args=(0, 4))
+    high = threading.Thread(target=stream_chunk, args=(0, 4))
     threads.append(high)
+
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
