@@ -10,6 +10,7 @@ import time
 out_buffer_low = []
 out_buffer_band = []
 out_buffer_high = []
+global_sample_rate = 1000
 
 class Chunk:
     'Common base class for Chunks'
@@ -73,6 +74,16 @@ def filter_chunk (chunk, gain):
 
 def input_stream ():
     pass
+
+def callback_in (indata, frames, time, status):
+    global global_sample_rate
+    chunk = Chunk()
+    chunk.data = indata
+    chunk.sample_rate = global_sample_rate
+    [h_chunk, b_chunk, l_chunk] = filter_chunk(chunk, 1)
+    out_buffer_low.append(l_chunk)
+    out_buffer_band.append(b_chunk)
+    out_buffer_high.append(h_chunk)
 
 def load_output_buffer ():
 
