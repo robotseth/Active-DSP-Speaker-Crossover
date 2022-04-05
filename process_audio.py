@@ -110,6 +110,14 @@ def async_play_chunks (chunk_array_index, audio_device):
                 play_chunk(global_chunk_array[chunk_array_index][i], audio_device)
                 i += 1
 
+
+def callback(outdata, frames, time, status):
+    for i in range(8):
+        channels[i] = audioData
+    multiChannel = np.column_stack(
+        (channels[0], channels[1], channels[2], channels[3], channels[4], channels[5], channels[6], channels[7]))
+    outdata[:] = multiChannel
+
 if __name__ == '__main__':
     lock = threading.Lock()
     global_chunk_array = np.empty(shape=(1,3))
@@ -119,11 +127,11 @@ if __name__ == '__main__':
     band_chunks = []
     low_chunks = []
 
-    low = threading.Thread(target=async_play_chunks, args=(2, 4))
+    low = threading.Thread(target=play_chunk_array, args=(2, 4))
     threads.append(low)
-    band = threading.Thread(target=async_play_chunks, args=(1, 4))
+    band = threading.Thread(target=play_chunk_array, args=(1, 4))
     threads.append(band)
-    high = threading.Thread(target=async_play_chunks, args=(0, 4))
+    high = threading.Thread(target=play_chunk_array, args=(0, 4))
     threads.append(high)
     for thread in threads:
         thread.start()
@@ -139,9 +147,7 @@ if __name__ == '__main__':
             #high_chunks.append(high_chunk)
             #band_chunks.append(band_chunk)
             #low_chunks.append(low_chunk)
-            lock.aquire()
             global_chunk_array = np.append(global_chunk_array,chunks,axis=0)
-            lock.release()
             rows, columns = global_chunk_array.shape
             print(rows)
             # export_chunk(high_chunk,n,"high")
