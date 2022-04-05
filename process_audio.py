@@ -103,13 +103,16 @@ def play_chunk (chunk, audio_device):
     sd.wait()
 
 
-def stream_chunk (chunk, audio_device):
+def stream_chunk (chunk, audio_device, filter_type):
 
-    if stream is None:
-        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1)
-    else:
+    if filter_type == 'low':
+        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1, callback=callback_low)
+    elif filter_type == 'band':
+        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1, callback=callback_band)
+    elif filter_type == 'high':
+        stream = sd.OutputStream(samplerate=chunk.sample_rate, device=audio_device, channels=1, callback=callback_high)
 
-    pass
+    stream.start()
 
 
 def play_chunk_array (chunk_array, audio_device):
@@ -167,6 +170,7 @@ if __name__ == '__main__':
     band_chunks = []
     low_chunks = []
 
+    # Old play_chunk-based functions
     # low = threading.Thread(target=play_chunk_array, args=(2, 4))
     # threads.append(low)
     # band = threading.Thread(target=play_chunk_array, args=(1, 4))
@@ -174,11 +178,11 @@ if __name__ == '__main__':
     # high = threading.Thread(target=play_chunk_array, args=(0, 4))
     # threads.append(high)
 
-    low = threading.Thread(target=stream_chunk, args=(2, 4))
+    low = threading.Thread(target=stream_chunk, args=(2, 4, 0))
     threads.append(low)
-    band = threading.Thread(target=stream_chunk, args=(1, 4))
+    band = threading.Thread(target=stream_chunk, args=(1, 4, 1))
     threads.append(band)
-    high = threading.Thread(target=stream_chunk, args=(0, 4))
+    high = threading.Thread(target=stream_chunk, args=(0, 4, 2))
     threads.append(high)
 
     for thread in threads:
