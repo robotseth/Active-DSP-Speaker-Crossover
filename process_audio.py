@@ -137,7 +137,25 @@ def callback_low(outdata, frames, time, status):
     rows, cols = out_buffer_low.size
     for row in range(rows):
         filtered_array.append(out_buffer_low[row].data)
-    out_buffer_low
+    np.delete(out_buffer_low, (np.linspace(1,rows-1,rows-1)), axis=0)
+    outdata[:] = filtered_array
+
+def callback_band(outdata, frames, time, status):
+    global out_buffer_band
+    filtered_array = []
+    rows, cols = out_buffer_band.size
+    for row in range(rows):
+        filtered_array.append(out_buffer_band[row].data)
+    np.delete(out_buffer_band, (np.linspace(1,rows-1,rows-1)), axis=0)
+    outdata[:] = filtered_array
+
+def callback_high(outdata, frames, time, status):
+    global out_buffer_high
+    filtered_array = []
+    rows, cols = out_buffer_high.size
+    for row in range(rows):
+        filtered_array.append(out_buffer_low[row].data)
+    np.delete(out_buffer_high, (np.linspace(1,rows-1,rows-1)), axis=0)
     outdata[:] = filtered_array
 
 if __name__ == '__main__':
