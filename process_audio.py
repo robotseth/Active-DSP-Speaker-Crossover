@@ -12,9 +12,9 @@ out_buffer_band = []
 out_buffer_high = []
 global_sample_rate = 44100
 input_device = 1
-output_device_low = 41
-output_device_band = 41
-output_device_high = 41
+output_device_low = 6
+output_device_band = 6
+output_device_high = 6
 
 
 class Chunk:
@@ -91,9 +91,9 @@ def callback_in (indata, frames, time, status):
     chunk.data = indata.copy().T[0]
     chunk.sample_rate = global_sample_rate
     #print(type(chunk.data))
-    #[h_chunk, b_chunk, l_chunk] = filter_chunk(chunk, 1)
-    #load_output_buffer([h_chunk, b_chunk, l_chunk])
-    load_output_buffer([chunk, chunk, chunk])
+    #load_output_buffer([chunk, chunk, chunk])
+    [h_chunk, b_chunk, l_chunk] = filter_chunk(chunk, 1)
+    load_output_buffer([h_chunk, b_chunk, l_chunk])
 
 def load_output_buffer (chunk_array):
     global out_buffer_low
