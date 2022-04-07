@@ -81,13 +81,15 @@ def input_stream ():
     stream.start()
 
 def callback_in (indata, frames, time, status):
+    print(type(indata.copy()))
+    print(indata.copy())
     global global_sample_rate
     chunk = Chunk()
     #print(indata.T[0])
     #print(type(indata))
-    chunk.data = indata.T[0]
+    chunk.data = indata.copy().T[0]
     chunk.sample_rate = global_sample_rate
-    print(type(chunk.data))
+    #print(type(chunk.data))
     #[h_chunk, b_chunk, l_chunk] = filter_chunk(chunk, 1)
     #load_output_buffer([h_chunk, b_chunk, l_chunk])
     load_output_buffer([chunk, chunk, chunk])
@@ -96,17 +98,33 @@ def load_output_buffer (chunk_array):
     global out_buffer_low
     global out_buffer_band
     global out_buffer_high
-    print(len(out_buffer_low))
+    #print(len(out_buffer_low))
     out_buffer_low.append(chunk_array[2])
     out_buffer_band.append(chunk_array[1])
     out_buffer_high.append(chunk_array[0])
-    print(len(out_buffer_low))
+    #print(len(out_buffer_low))
+
 
 def export_chunk (chunk, number, name):
+    global global_sample_rate
     filename = f'chunk_{name}_{number}.wav'
-    write_address = os.path.join("C:\\Users\\Seth\\Documents\\school\\EGR334\\exports\\", filename)
-    #write_address = os.path.join("C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\discord\\", filename)
-    write(write_address, chunk_array[number].sample_rate, chunk)  # Saving it to the file.
+    #write_address = os.path.join("C:\\Users\\Seth\\Documents\\school\\EGR334\\exports\\", filename)
+    write_address = os.path.join("C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\discord\\", filename)
+    chunk.data = np.int16(chunk.data / np.max(np.abs(chunk.data)) * 32767)
+    write(write_address, global_sample_rate, chunk.data)  # Saving it to the file.
+
+
+def join_chunks (chunks):
+    global global_sample_rate
+    data_array = []
+    big_boy_chunk = Chunk()
+    print(len(chunks))
+    for i in range(len(chunks)):
+        data_array = np.append(data_array, chunks[i].data)
+        print(len(data_array))
+    big_boy_chunk.data = data_array
+    big_boy_chunk.sample_rate = global_sample_rate
+    return big_boy_chunk
 
 
 def play_chunk (chunk, audio_device):
@@ -150,6 +168,7 @@ def callback_low(outdata, frames, time, status):
     global out_buffer_low
     print(type(out_buffer_low[0].data))
     print(out_buffer_low[0].data)
+    out_buffer_low[0].data = np.int16(out_buffer_low[0].data / np.max(np.abs(out_buffer_low[0].data)) * 32767)
     outdata[:] = out_buffer_low[0].data.reshape(len(out_buffer_low[0].data),1)
     out_buffer_low.pop(0)
 
@@ -164,17 +183,16 @@ def callback_high(outdata, frames, time, status):
     out_buffer_high.pop(0)
 
 if __name__ == '__main__':
-
+    """
     chunk_0 = Chunk()
-    chunk_0.data = np.zeros(4410)
+    chunk_0.data = np.ones(4410)
     out_buffer_low = [chunk_0] * 10
     out_buffer_band = [chunk_0] * 10
     out_buffer_high = [chunk_0] * 10
     print(out_buffer_low)
-
-    threads = []  # list to hold threads
-    #chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
     """
+    threads = []  # list to hold threads
+    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
     for n in range(len(chunk_array)):
         [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n], .5)
         out_buffer_high.append(high_chunk)
@@ -183,21 +201,22 @@ if __name__ == '__main__':
         # export_chunk(high_chunk,n,"high")
         # export_chunk(band_chunk, n,"band")
         # export_chunk(low_chunk, n,"low")
-    """
     #print(out_buffer_high[200].data)
-    input = threading.Thread(target=input_stream, args=(), daemon=True)
-    threads.append(input)
+    #input = threading.Thread(target=input_stream, args=(), daemon=True)
+    #threads.append(input)
     low = threading.Thread(target=stream_chunk, args=('l'), daemon=True)
     threads.append(low)
-    #band = threading.Thread(target=stream_chunk, args=('b'), daemon=True)
-    #threads.append(band)
-    #high = threading.Thread(target=stream_chunk, args=('h'), daemon=True)
-    #threads.append(high)
+    band = threading.Thread(target=stream_chunk, args=('b'), daemon=True)
+    threads.append(band)
+    high = threading.Thread(target=stream_chunk, args=('h'), daemon=True)
+    threads.append(high)
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
         thread.join()
     time.sleep(100)
+
+    #export_chunk(join_chunks(out_buffer_low),0,"test")
 
 
 """
