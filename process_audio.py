@@ -12,9 +12,9 @@ out_buffer_band = []
 out_buffer_high = []
 global_sample_rate = 44100
 input_device = 1
-output_device_low = 6
-output_device_band = 6
-output_device_high = 6
+output_device_low = 5
+output_device_band = 5
+output_device_high = 5
 
 
 class Chunk:
@@ -207,9 +207,9 @@ if __name__ == '__main__':
     input = threading.Thread(target=input_stream, args=(), daemon=True)
     threads.append(input)
     low = threading.Thread(target=stream_chunk, args=('l'), daemon=True)
-    threads.append(low)
+    #threads.append(low)
     band = threading.Thread(target=stream_chunk, args=('b'), daemon=True)
-    #threads.append(band)
+    threads.append(band)
     high = threading.Thread(target=stream_chunk, args=('h'), daemon=True)
     #threads.append(high)
     for thread in threads:
