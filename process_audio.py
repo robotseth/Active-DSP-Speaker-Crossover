@@ -12,9 +12,9 @@ out_buffer_band = []
 out_buffer_high = []
 global_sample_rate = 44100
 input_device = 1
-output_device_low = 6
-output_device_band = 6
-output_device_high = 6
+output_device_low = 41
+output_device_band = 41
+output_device_high = 41
 
 
 class Chunk:
