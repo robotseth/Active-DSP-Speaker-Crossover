@@ -12,9 +12,10 @@ out_buffer_band = []
 out_buffer_high = []
 global_sample_rate = 44100
 input_device = 1
-output_device_low = 7
-output_device_band = 7
-output_device_high = 7
+output_device_low = 6
+output_device_band = 6
+output_device_high = 6
+
 
 class Chunk:
     'Common base class for Chunks'
@@ -166,9 +167,9 @@ def async_play_chunks (chunk_array_index, audio_device):
 
 def callback_low(outdata, frames, time, status):
     global out_buffer_low
-    print(type(out_buffer_low[0].data))
+    #print(type(out_buffer_low[0].data))
     print(out_buffer_low[0].data)
-    out_buffer_low[0].data = np.int16(out_buffer_low[0].data / np.max(np.abs(out_buffer_low[0].data)) * 32767)
+    #out_buffer_low[0].data = np.int16(out_buffer_low[0].data / np.max(np.abs(out_buffer_low[0].data)) * 32767)
     outdata[:] = out_buffer_low[0].data.reshape(len(out_buffer_low[0].data),1)
     out_buffer_low.pop(0)
 
@@ -183,16 +184,15 @@ def callback_high(outdata, frames, time, status):
     out_buffer_high.pop(0)
 
 if __name__ == '__main__':
-    """
     chunk_0 = Chunk()
     chunk_0.data = np.ones(4410)
-    out_buffer_low = [chunk_0] * 10
-    out_buffer_band = [chunk_0] * 10
-    out_buffer_high = [chunk_0] * 10
+    out_buffer_low = [chunk_0] * 1
+    out_buffer_band = [chunk_0] * 1
+    out_buffer_high = [chunk_0] * 1
     print(out_buffer_low)
-    """
     threads = []  # list to hold threads
-    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
+    #chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
+    """
     for n in range(len(chunk_array)):
         [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n], .5)
         out_buffer_high.append(high_chunk)
@@ -202,14 +202,16 @@ if __name__ == '__main__':
         # export_chunk(band_chunk, n,"band")
         # export_chunk(low_chunk, n,"low")
     #print(out_buffer_high[200].data)
-    #input = threading.Thread(target=input_stream, args=(), daemon=True)
-    #threads.append(input)
+
+    """
+    input = threading.Thread(target=input_stream, args=(), daemon=True)
+    threads.append(input)
     low = threading.Thread(target=stream_chunk, args=('l'), daemon=True)
     threads.append(low)
     band = threading.Thread(target=stream_chunk, args=('b'), daemon=True)
-    threads.append(band)
+    #threads.append(band)
     high = threading.Thread(target=stream_chunk, args=('h'), daemon=True)
-    threads.append(high)
+    #threads.append(high)
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
