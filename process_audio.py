@@ -175,6 +175,7 @@ def async_play_chunks (chunk_array_index, audio_device):
                 play_chunk(global_chunk_array[chunk_array_index][i], audio_device)
                 i += 1
 
+# Callback function for the lowpass filter
 def callback_low(outdata, frames, time, status):
     global out_buffer_low
     #print(type(out_buffer_low[0].data))
