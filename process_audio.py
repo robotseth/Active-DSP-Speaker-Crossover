@@ -127,11 +127,6 @@ def join_chunks (chunks):
     return big_boy_chunk
 
 
-# Old function for playing chunks individually
-def play_chunk (chunk, audio_device):
-    sd.play(chunk.data, chunk.sample_rate, device=audio_device)
-    sd.wait()
-
 # Main playback function that runs on individual audio output threads. Takes a single argument that starts the sounddevice
 # stream with the appropriate callback function and output device for the selected filter.
 def stream_chunk (filter_type):
@@ -151,25 +146,6 @@ def stream_chunk (filter_type):
 
     stream.start()
 
-# Old function that plays an entire array of chunks in series
-def play_chunk_array (chunk_array, audio_device):
-    for n in range(len(chunk_array)):
-        play_chunk(chunk_array[n], audio_device)
-
-# Old function
-def async_play_chunks (chunk_array_index, audio_device):
-    i = 1
-    global global_chunk_array
-    global lock
-    while True:
-        if not lock:
-            rows, columns = global_chunk_array.shape
-            #print("Num rows: " + str(rows))
-            if i < rows:
-                print("Num rows: " + str(rows))
-                print("I is: " + str(i))
-                play_chunk(global_chunk_array[chunk_array_index][i], audio_device)
-                i += 1
 
 # Callback function for the lowpass filter
 def callback_low(outdata, frames, time, status):
@@ -226,31 +202,3 @@ if __name__ == '__main__':
     time.sleep(100)
 
     #export_chunk(join_chunks(out_buffer_low),0,"test")
-
-
-"""
-if __name__ == '__main__':
-    threads = []  # list to hold threads
-    chunk_array = import_wav('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav', 10000)
-    high_chunks = []
-    band_chunks = []
-    low_chunks = []
-    for n in range(len(chunk_array)):
-        [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n])
-        high_chunks.append(high_chunk)
-        band_chunks.append(band_chunk)
-        low_chunks.append(low_chunk)
-        # export_chunk(high_chunk,n,"high")
-        # export_chunk(band_chunk, n,"band")
-        # export_chunk(low_chunk, n,"low")
-    low = threading.Thread(target=play_chunk_array, args=(low_chunks, 4))
-    threads.append(low)
-    band = threading.Thread(target=play_chunk_array, args=(band_chunks, 4))
-    threads.append(band)
-    high = threading.Thread(target=play_chunk_array, args=(high_chunks, 4))
-    threads.append(high)
-    for thread in threads:
-        thread.start()
-    for thread in threads:  # wait for all threads to finish
-        thread.join()
-"""
