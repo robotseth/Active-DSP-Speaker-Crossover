@@ -128,15 +128,21 @@ def join_chunks (chunks):
     return big_boy_chunk
 
 
+# Old function for playing chunks individually
 def play_chunk (chunk, audio_device):
     sd.play(chunk.data, chunk.sample_rate, device=audio_device)
     sd.wait()
 
-
+# Main playback function that runs on individual audio output threads. Takes a single argument that starts the sounddevice
+# stream with the appropriate callback function and output device for the selected filter.
 def stream_chunk (filter_type):
     global output_device_low
     global output_device_band
     global output_device_high
+
+    # Select which callback function and output device to use.
+    # The sounddevice OutputStream takes in a handle for a callback function which is responsible for filling the
+    # output buffer array, and is called whenever the output buffer is empty.
     if filter_type == 'l':
         stream = sd.OutputStream(device=output_device_low, channels=1, callback=callback_low, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate) #samplerate=out_buffer_low[0].sample_rate
     elif filter_type == 'b':
@@ -146,11 +152,12 @@ def stream_chunk (filter_type):
 
     stream.start()
 
-
+# Old function that plays an entire array of chunks in series
 def play_chunk_array (chunk_array, audio_device):
     for n in range(len(chunk_array)):
         play_chunk(chunk_array[n], audio_device)
 
+# Old function
 def async_play_chunks (chunk_array_index, audio_device):
     i = 1
     global global_chunk_array
