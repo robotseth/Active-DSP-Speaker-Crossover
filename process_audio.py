@@ -7,9 +7,11 @@ import sounddevice as sd
 import threading
 import time
 
+# arrays to store chunks of audio for each filter output
 out_buffer_low = []
 out_buffer_band = []
 out_buffer_high = []
+# global variables to define the sample rate and audio devices
 global_sample_rate = 44100
 input_device = 1
 output_device_low = 6
