@@ -32,10 +32,6 @@ class Chunk:
         print
         "Total Chunks %d" % Chunk.chunk_count
 
-#(samplerate, array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Lacrimosa.wav') # Reading the sound file.
-#(samplerate, raw_array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav') # Reading the sound file.
-#(Frequency, array) = read('C:\\Users\\mikef\\Desktop\\_Spring 2022\\EGR 334 T 9am\\Final Project\\5. Harris Heller - Floating Soul.wav') # Reading the sound file.
-
 # Imports a wave file and generates an array of Chunk objects with the data from the file
 # the data is stored as numpy arrays
 def import_wav (file_path, chunk_size):
@@ -71,7 +67,7 @@ def filter (chunk, type, gain):
     filtered_chunk = Chunk(chunk.length, chunk.sample_rate, data)
     return filtered_chunk # returns filtered chunk
 
-
+# calls the filter function 3 times for each filter type and returns an array of filtered chunks
 def filter_chunk (chunk, gain):
     h_chunk = filter(chunk,'h', gain)
     b_chunk = filter(chunk,'b', gain)
