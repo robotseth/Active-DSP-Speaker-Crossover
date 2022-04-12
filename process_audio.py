@@ -146,37 +146,44 @@ def stream_chunk (filter_type):
 # OutputStream callback functions: 
 # These functions run automatically whenever the output buffers on each of the audio output threads run out of data to
 # play. The arguments are specific to sounddevice and were not modified from the documentation, but the body of the
-# function is designed to handle the loading of ft
+# function is designed to handle the loading of the outdata stream array: it takes the oldest chunk in the appropriate
+# output buffer, copies it into the outdata stream array, and then pops off that chunk.
 
 # Callback function for the lowpass filter
 def callback_low(outdata, frames, time, status):
     global out_buffer_low
-    #print(type(out_buffer_low[0].data))
-    print(out_buffer_low[0].data)
-    #out_buffer_low[0].data = np.int16(out_buffer_low[0].data / np.max(np.abs(out_buffer_low[0].data)) * 32767)
     outdata[:] = out_buffer_low[0].data.reshape(len(out_buffer_low[0].data),1)
     out_buffer_low.pop(0)
 
+# Callback function for the bandpass filter
 def callback_band(outdata, frames, time, status):
     global out_buffer_band
     outdata[:] = out_buffer_band[0].data.reshape(len(out_buffer_band[0].data),1)
     out_buffer_band.pop(0)
 
+# Callback function for the highpass filter
 def callback_high(outdata, frames, time, status):
     global out_buffer_high
     outdata[:] = out_buffer_high[0].data.reshape(len(out_buffer_high[0].data),1)
     out_buffer_high.pop(0)
 
+# Main program running on the main thread
 if __name__ == '__main__':
+    # Create a silent chunk of only 1s.
     chunk_0 = Chunk()
     chunk_0.data = np.ones(4410)
+    # Copy the silent chunk into each of the output buffers.
     out_buffer_low = [chunk_0] * 1
     out_buffer_band = [chunk_0] * 1
     out_buffer_high = [chunk_0] * 1
-    print(out_buffer_low)
     threads = []  # list to hold threads
+
+    # Imports a sample audio file to play through the DSP.
+    # (Should be commented out when using live audio input)
     chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
 
+    # Filters each chunk of the imported audio file and appends all the chunks to the output buffers.
+    # (Should be commented out when using live audio input)
     for n in range(len(chunk_array)):
         [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n], .5)
         out_buffer_high.append(high_chunk)
@@ -187,7 +194,7 @@ if __name__ == '__main__':
         # export_chunk(low_chunk, n,"low")
     #print(out_buffer_high[200].data)
 
-
+    # Sets up the threads for audio input and output streaming.
     input = threading.Thread(target=input_stream, args=(), daemon=True)
     #threads.append(input)
     low = threading.Thread(target=stream_chunk, args=('l'), daemon=True)
@@ -196,6 +203,8 @@ if __name__ == '__main__':
     #threads.append(band)
     high = threading.Thread(target=stream_chunk, args=('h'), daemon=True)
     threads.append(high)
+
+    # Start each thread, then wait until all the threads are finished.
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
