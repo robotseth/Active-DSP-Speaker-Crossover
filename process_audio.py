@@ -12,11 +12,12 @@ out_buffer_band = []
 out_buffer_high = []
 global_sample_rate = 44100
 input_device = 1
-output_device_low = 5
-output_device_band = 5
-output_device_high = 5
+output_device_low = 6
+output_device_band = 6
+output_device_high = 6
 
-
+# defines a Chunk class for generating chunk objects
+# each Chunk is a section of audio and stores the audio data, sample rate, and chunk duration
 class Chunk:
     'Common base class for Chunks'
     chunk_count = 0
@@ -35,39 +36,41 @@ class Chunk:
 #(samplerate, raw_array) = read('C:\\Users\\Seth\\Documents\\school\\EGR334\\audio\\Chicago.wav') # Reading the sound file.
 #(Frequency, array) = read('C:\\Users\\mikef\\Desktop\\_Spring 2022\\EGR 334 T 9am\\Final Project\\5. Harris Heller - Floating Soul.wav') # Reading the sound file.
 
-# split audio file into chunks
+# Imports a wave file and generates an array of Chunk objects with the data from the file
+# the data is stored as numpy arrays
 def import_wav (file_path, chunk_size):
-    chunk_array = []
-    scaled_data = 0
+    chunk_array = [] # defines an empty array to append Chunks to
     (sample_rate, raw_array) = read(file_path) # reads the wave file into an array
-    raw_length_ms = 1000 * raw_array.shape[0] / sample_rate
-    num_chunks = int(raw_length_ms / chunk_size) + (raw_length_ms % chunk_size > 0)
-    print("Length (ms): " + str(raw_length_ms))
-    left_data = raw_array[:, 0]
-    scaled_data = np.int16(left_data / np.max(np.abs(left_data)) * 32767)
-    sub_arrays = np.array_split(scaled_data, num_chunks)
-    for i in range(num_chunks):
+    raw_length_ms = 1000 * raw_array.shape[0] / sample_rate # calculates the length of the audio file
+    num_chunks = int(raw_length_ms / chunk_size) + (raw_length_ms % chunk_size > 0) # divides the audio file length by the desired chunk duration and rounds up
+    print("Length (ms): " + str(raw_length_ms)) # prints the length of the audio file
+    left_data = raw_array[:, 0] # saves the left channel of the audio data
+    scaled_data = np.int16(left_data / np.max(np.abs(left_data)) * 32767) # scales the data to fit at a 16 bit wav file
+    sub_arrays = np.array_split(scaled_data, num_chunks) # splits the data into Chunks
+    for i in range(num_chunks): # assigns data to the generated Chunks
         chunk = Chunk()
         chunk.data = sub_arrays[i]
         chunk.sample_rate = sample_rate
-        chunk.length = raw_length_ms #len(sub_arrays[i])
+        chunk.length = raw_length_ms
         chunk_array.append(chunk)
     print("Number of chunks: " + str(len(chunk_array)))
-    return chunk_array
+    return chunk_array # returns an array of generated Chunks
 
+# filters a Chunk and returns a filtered Chunk
 def filter (chunk, type, gain):
     if type == "highpass" or type == "h" :
-        b, a = signal.butter(5, 1000 / (chunk.sample_rate / 2), btype='highpass')  # ButterWorth filter 4350
+        b, a = signal.butter(5, 1000 / (chunk.sample_rate / 2), btype='highpass')  # defines a butterworth high-pass filter
     elif type == "lowpass" or type == "l" :
-        b, a = signal.butter(5, 380 / (chunk.sample_rate / 2), btype='lowpass')  # ButterWorth low-filter
+        b, a = signal.butter(5, 380 / (chunk.sample_rate / 2), btype='lowpass')  # defines a butterworth low-pass filter
     elif type == "bandpass" or type == "b" :
-        b, a = signal.butter(5, [380 / (chunk.sample_rate / 2), 1000 / (chunk.sample_rate / 2)], btype='band')  # ButterWorth low-filter
+        b, a = signal.butter(5, [380 / (chunk.sample_rate / 2), 1000 / (chunk.sample_rate / 2)], btype='band')  # defines a butterworth band-pass filter
     else:
         print("Error - not valid filter type")
-    data = signal.lfilter(b, a, chunk.data)
-    data = np.int16(data / np.max(np.abs(data)) * 32767) * gain
+    data = signal.lfilter(b, a, chunk.data) # applies the defined filter to the data
+    data = np.int16(data / np.max(np.abs(data)) * 32767) * gain # scales the data to fit within the 16 bit wav file size
     filtered_chunk = Chunk(chunk.length, chunk.sample_rate, data)
-    return filtered_chunk
+    return filtered_chunk # returns filtered chunk
+
 
 def filter_chunk (chunk, gain):
     h_chunk = filter(chunk,'h', gain)
@@ -191,8 +194,8 @@ if __name__ == '__main__':
     out_buffer_high = [chunk_0] * 1
     print(out_buffer_low)
     threads = []  # list to hold threads
-    #chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
-    """
+    chunk_array = import_wav('C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\audio\\Lacrimosa.wav', 100)
+
     for n in range(len(chunk_array)):
         [high_chunk, band_chunk, low_chunk] = filter_chunk(chunk_array[n], .5)
         out_buffer_high.append(high_chunk)
@@ -203,15 +206,15 @@ if __name__ == '__main__':
         # export_chunk(low_chunk, n,"low")
     #print(out_buffer_high[200].data)
 
-    """
+
     input = threading.Thread(target=input_stream, args=(), daemon=True)
-    threads.append(input)
+    #threads.append(input)
     low = threading.Thread(target=stream_chunk, args=('l'), daemon=True)
     #threads.append(low)
     band = threading.Thread(target=stream_chunk, args=('b'), daemon=True)
-    threads.append(band)
+    #threads.append(band)
     high = threading.Thread(target=stream_chunk, args=('h'), daemon=True)
-    #threads.append(high)
+    threads.append(high)
     for thread in threads:
         thread.start()
     for thread in threads:  # wait for all threads to finish
