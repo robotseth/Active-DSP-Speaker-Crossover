@@ -7,9 +7,11 @@ import sounddevice as sd
 import threading
 import time
 
+# arrays to store chunks of audio for each filter output
 out_buffer_low = []
 out_buffer_band = []
 out_buffer_high = []
+# global variables to define the sample rate and audio devices
 global_sample_rate = 44100
 input_device = 1
 output_device_low = 6
@@ -180,8 +182,6 @@ if __name__ == '__main__':
         # export_chunk(high_chunk,n,"high")
         # export_chunk(band_chunk, n,"band")
         # export_chunk(low_chunk, n,"low")
-    #print(out_buffer_high[200].data)
-
 
     input = threading.Thread(target=input_stream, args=(), daemon=True)
     #threads.append(input)
@@ -196,5 +196,3 @@ if __name__ == '__main__':
     for thread in threads:  # wait for all threads to finish
         thread.join()
     time.sleep(100)
-
-    #export_chunk(join_chunks(out_buffer_low),0,"test")
