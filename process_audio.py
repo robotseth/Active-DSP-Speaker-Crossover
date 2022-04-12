@@ -200,4 +200,4 @@ if __name__ == '__main__':
         thread.start()
     for thread in threads:  # wait for all threads to finish
         thread.join()
-    time.sleep(100)
+    time.sleep(100) # stops running after 100 seconds
