@@ -147,6 +147,11 @@ def stream_chunk (filter_type):
     stream.start()
 
 
+# OutputStream callback functions: 
+# These functions run automatically whenever the output buffers on each of the audio output threads run out of data to
+# play. The arguments are specific to sounddevice and were not modified from the documentation, but the body of the
+# function is designed to handle the loading of ft
+
 # Callback function for the lowpass filter
 def callback_low(outdata, frames, time, status):
     global out_buffer_low
