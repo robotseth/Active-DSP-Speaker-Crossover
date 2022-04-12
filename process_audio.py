@@ -75,44 +75,40 @@ def filter_chunk (chunk, gain):
     filtered_chunks = [h_chunk, b_chunk, l_chunk]
     return filtered_chunks
 
+# defines a sounddevice stream to get live audio input data
+# calls the callback function callback_in() every time the input data reaches the block size
 def input_stream ():
     global input_device
     stream = sd.InputStream(device=input_device, channels=1, callback=callback_in, blocksize=4410, dtype=np.int16, samplerate=global_sample_rate)
     stream.start()
 
+# is called by input_stream()
+# defines a chunk from the input data it recieves from the input_stream() function
 def callback_in (indata, frames, time, status):
-    print(type(indata.copy()))
-    print(indata.copy())
     global global_sample_rate
     chunk = Chunk()
-    #print(indata.T[0])
-    #print(type(indata))
     chunk.data = indata.copy().T[0]
     chunk.sample_rate = global_sample_rate
-    #print(type(chunk.data))
-    #load_output_buffer([chunk, chunk, chunk])
-    [h_chunk, b_chunk, l_chunk] = filter_chunk(chunk, 1)
-    load_output_buffer([h_chunk, b_chunk, l_chunk])
+    [h_chunk, b_chunk, l_chunk] = filter_chunk(chunk, 1) # filters the input chunk into lowpass, bandpass, and highpass chunks
+    load_output_buffer([h_chunk, b_chunk, l_chunk]) # calls the load_output_buffer() function to queue the generated chunks
 
+# queues the generated chunks to be played by the output functions
 def load_output_buffer (chunk_array):
     global out_buffer_low
     global out_buffer_band
     global out_buffer_high
-    #print(len(out_buffer_low))
     out_buffer_low.append(chunk_array[2])
     out_buffer_band.append(chunk_array[1])
     out_buffer_high.append(chunk_array[0])
-    #print(len(out_buffer_low))
 
 
+# saves a chunk as a wav file
 def export_chunk (chunk, number, name):
     global global_sample_rate
-    filename = f'chunk_{name}_{number}.wav'
-    #write_address = os.path.join("C:\\Users\\Seth\\Documents\\school\\EGR334\\exports\\", filename)
+    filename = f'chunk_{name}_{number}.wav' # generates a string of the file name based on the number of the chunk and the user defined name
     write_address = os.path.join("C:\\Users\\Seth Altobelli\\Documents\\school\\EGR334\\EGR334\\discord\\", filename)
-    chunk.data = np.int16(chunk.data / np.max(np.abs(chunk.data)) * 32767)
-    write(write_address, global_sample_rate, chunk.data)  # Saving it to the file.
-
+    chunk.data = np.int16(chunk.data / np.max(np.abs(chunk.data)) * 32767) # scales the data to fit into 16 bit wav file
+    write(write_address, global_sample_rate, chunk.data)  # Saves the data to a file
 
 def join_chunks (chunks):
     global global_sample_rate
