@@ -7,6 +7,6 @@ This was made for a class project. It is functional, but still needs the followi
 - File paths are not relative
 - There is no volume control beyond the scaling of the Chunk data
 
-Dispite these problems, the system does work. Do use it, you must change the following to match your system.
+Dispite these problems, the system does work. To use it, you must change the following to match your system.
 - The input and output speaker device numbers must be changed. You can find the correct numbers by running the following command: ```python -m sounddevice```
 - The file paths to any audio files must be changed to match your device
